@@ -1,6 +1,6 @@
 [project]
 name = "ltester-pro-backend"
-version = "0.1.0"
+version = "0.2.0"
 description = "Unified API/Web/App automation test platform backend"
 requires-python = ">=3.11"
 dependencies = [
@@ -8,7 +8,8 @@ dependencies = [
   "uvicorn>=0.30.0",
   "pydantic-settings>=2.4.0",
   "python-jose[cryptography]>=3.3.0",
-  "apscheduler>=3.10.4"
+  "apscheduler>=3.10.4",
+  "sqlalchemy>=2.0.32"
 ]
 
 [project.optional-dependencies]

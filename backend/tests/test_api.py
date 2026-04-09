@@ -12,13 +12,17 @@ def test_health() -> None:
     assert response.json()["status"] == "ok"
 
 
-def test_login_and_run() -> None:
+def test_login_project_and_run() -> None:
     login = client.post(
         "/api/v1/auth/login",
         json={"username": "admin", "password": "admin123"},
     )
     assert login.status_code == 200
     assert login.json()["access_token"]
+
+    projects = client.get("/api/v1/project/list")
+    assert projects.status_code == 200
+    assert len(projects.json()) >= 1
 
     run = client.post(
         "/api/v1/run",
