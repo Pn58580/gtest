@@ -1,13 +1,23 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
+from app.core.config import settings
 from app.core.scheduler import scheduler
 from app.db.session import SessionLocal
 from app.services.bootstrap_service import init_db
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="L-Tester Pro API", version="0.3.0")
+    app = FastAPI(title="L-Tester Pro API", version="0.4.0")
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     @app.get("/health", tags=["system"])
     def health() -> dict[str, str]:

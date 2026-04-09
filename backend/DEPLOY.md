@@ -37,16 +37,41 @@ pip install -r requirements.txt
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-## 3. 生产环境变量
+## 3. 数据库要不要本地先创建？
+
+### 默认方案（SQLite）
+- **不需要你手动建库**。
+- `LT_DATABASE_URL=sqlite:///./ltester.db` 时，应用启动会自动创建本地 `ltester.db` 文件并建表。
+
+### MySQL 方案
+- 需要数据库实例存在。
+- 推荐直接用项目根目录 `docker compose up -d mysql`，Compose 会自动创建 `ltester` 数据库和用户。
+- 如果你本地已有 MySQL，也可以手动创建：
+
+```sql
+CREATE DATABASE ltester DEFAULT CHARACTER SET utf8mb4;
+```
+
+## 4. 生产环境变量
 
 建议配置（可放 `.env` 或系统环境变量）：
 
 ```bash
 LT_DATABASE_URL=mysql+pymysql://tester:tester123@127.0.0.1:3306/ltester
 LT_JWT_SECRET=please_change_in_prod
+LT_CORS_ORIGINS=http://127.0.0.1:5173,http://localhost:5173
 ```
 
-## 4. 数据库初始化
+## 5. 登录失败 / OPTIONS 405 处理
+
+如果你看到：`OPTIONS /api/v1/auth/login 405`，通常是跨域预检（CORS）问题。
+
+处理方式：
+1. 升级到当前版本（已内置 `CORSMiddleware`）。
+2. 在 `.env` 中设置前端地址到 `LT_CORS_ORIGINS`。
+3. 重启后端。
+
+## 6. 数据库初始化
 
 应用启动时会自动执行：
 - 建表（SQLAlchemy metadata）
@@ -55,7 +80,7 @@ LT_JWT_SECRET=please_change_in_prod
 
 默认管理员：`admin / admin123`（生产环境务必修改）
 
-## 5. Docker 部署
+## 7. Docker 部署
 
 项目根目录：
 

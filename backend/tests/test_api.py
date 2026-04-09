@@ -22,6 +22,18 @@ def test_health() -> None:
     assert response.json()["status"] == "ok"
 
 
+def test_cors_preflight_login() -> None:
+    response = client.options(
+        '/api/v1/auth/login',
+        headers={
+            'Origin': 'http://127.0.0.1:5173',
+            'Access-Control-Request-Method': 'POST',
+            'Access-Control-Request-Headers': 'content-type',
+        },
+    )
+    assert response.status_code in (200, 204)
+
+
 def test_full_mvp_flow() -> None:
     headers = _auth_headers()
 

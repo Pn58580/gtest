@@ -348,3 +348,16 @@ docker compose up --build -d
 - 新增后端 `api-case` 相关接口：`/api-case/list|create|run/{id}|delete`
 - 前端新增“接口用例”页面并接入后端
 - 后端部署文档补充到 `backend/DEPLOY.md`，并提供 `requirements.txt` 兼容传统部署
+
+## 18. 常见启动问题
+
+### Q1: 数据库需要我手动创建吗？
+- 默认 SQLite：不需要，启动自动创建。
+- 使用 MySQL：建议用 docker-compose 自动创建，或手动 `CREATE DATABASE ltester;`。
+
+### Q2: 登录时报 `OPTIONS /api/v1/auth/login 405`
+- 这是前后端跨域预检请求。
+- 当前版本已内置 CORS 中间件。
+- 请在后端 `.env` 增加：
+  - `LT_CORS_ORIGINS=http://127.0.0.1:5173,http://localhost:5173`
+- 然后重启后端服务。
