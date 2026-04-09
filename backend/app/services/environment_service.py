@@ -28,6 +28,12 @@ class EnvironmentService:
         db.commit()
         return True
 
+    def get_env(self, db: Session, env_id: int) -> Environment | None:
+        return db.get(Environment, env_id)
+
+    def get_default_env(self, db: Session, project_id: int) -> Environment | None:
+        return db.scalar(select(Environment).where(Environment.project_id == project_id).order_by(Environment.id.asc()))
+
     def seed_default_env(self, db: Session, project_id: int) -> None:
         exists = db.scalar(select(Environment).where(Environment.project_id == project_id).limit(1))
         if exists:

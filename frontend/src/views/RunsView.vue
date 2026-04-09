@@ -8,6 +8,9 @@
       <el-form-item label="项目ID">
         <el-input-number v-model="form.project_id" :min="1" />
       </el-form-item>
+      <el-form-item label="环境ID">
+        <el-input-number v-model="form.env_id" :min="1" />
+      </el-form-item>
       <el-form-item label="用例ID">
         <el-input-number v-model="form.case_id" :min="1" />
       </el-form-item>
@@ -51,6 +54,7 @@ const lastResult = ref<Record<string, unknown> | null>(null)
 
 const form = reactive({
   project_id: 1,
+  env_id: 1,
   case_id: 1,
   engine: 'api',
   triggered_by: 'admin',

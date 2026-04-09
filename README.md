@@ -403,3 +403,9 @@ docker compose up --build -d
 - 后端新增 `GET /api/v1/report/stats` 统计接口
 - 统计项包含：总执行数、通过数、失败数、API/Web/App 各自执行数
 - 前端仪表盘改为动态读取统计数据，不再使用写死示例值
+
+## 24. 继续完善（环境维度执行）
+
+- API/Web/App 用例执行支持绑定环境（env）
+- Runner 执行步骤中会记录环境信息（env_name/base_url）
+- 执行中心页面新增环境ID输入，便于按环境触发运行

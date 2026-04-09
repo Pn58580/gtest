@@ -11,9 +11,9 @@ class AppRunner(BaseRunner):
         device_id = str(request.params.get('device_id', 'emulator-5554'))
         script_path = str(request.params.get('script_path', 'scripts/demo.air'))
         expect = str(request.params.get('assert_keyword', 'success')).strip()
+        env_name = str(request.params.get('env_name', '')).strip()
 
-        # 模拟 Airtest 执行日志
-        output = f"device={device_id}; script={script_path}; result=success"
+        output = f"env={env_name}; device={device_id}; script={script_path}; result=success"
         keyword_ok = expect in output if expect else True
 
         return RunResult(

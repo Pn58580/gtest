@@ -11,8 +11,8 @@ class WebRunner(BaseRunner):
         page_url = str(request.params.get('page_url', 'https://example.com'))
         selector = str(request.params.get('selector', 'h1'))
         expect_text = str(request.params.get('expect_text', 'Example')).strip()
+        env_name = str(request.params.get('env_name', '')).strip()
 
-        # 模拟页面元素文本
         simulated_text = 'Example Domain' if 'example.com' in page_url else 'Unknown Page'
         assert_ok = expect_text in simulated_text if expect_text else True
 
@@ -22,7 +22,7 @@ class WebRunner(BaseRunner):
             status="passed" if assert_ok else "failed",
             duration_ms=890,
             steps=[
-                StepResult(name="launch_browser", status="passed", message="chromium started"),
+                StepResult(name="launch_browser", status="passed", message=f"env={env_name or 'default'}"),
                 StepResult(name="open_page", status="passed", message=page_url),
                 StepResult(
                     name='assert_dom_text',

@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 class RunRequest(BaseModel):
     project_id: int = Field(..., ge=1)
     case_id: int = Field(..., ge=1)
+    env_id: int | None = Field(default=None, ge=1)
     engine: Literal["api", "web", "app"]
     triggered_by: str = Field(default="")
     params: dict[str, Any] = Field(default_factory=dict)

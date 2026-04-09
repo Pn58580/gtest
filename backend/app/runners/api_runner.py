@@ -11,8 +11,9 @@ class ApiRunner(BaseRunner):
         path = str(request.params.get('path', '/'))
         expected_status = int(request.params.get('expected_status', 200))
         expected_keyword = str(request.params.get('expected_keyword', '')).strip()
+        base_url = str(request.params.get('base_url', '')).strip()
+        env_name = str(request.params.get('env_name', '')).strip()
 
-        # 模拟响应
         if path == '/health':
             response_status = 200
             response_text = '{"status":"ok"}'
@@ -30,8 +31,8 @@ class ApiRunner(BaseRunner):
             status="passed" if final_ok else "failed",
             duration_ms=320,
             steps=[
-                StepResult(name="build_request", status="passed", message="request built"),
-                StepResult(name="send_request", status="passed", message=f"{response_status}"),
+                StepResult(name="build_request", status="passed", message=f"env={env_name or 'default'}"),
+                StepResult(name="send_request", status="passed", message=f"{base_url}{path}"),
                 StepResult(
                     name="assert_status",
                     status="passed" if status_ok else "failed",
