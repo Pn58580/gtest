@@ -5,5 +5,16 @@ from app.models.environment import Environment
 from app.models.project import Project
 from app.models.task import TaskRun, TaskSchedule
 from app.models.user import User
+from app.models.web_case import WebCase
 
-__all__ = ["Base", "User", "Project", "Environment", "TaskSchedule", "TaskRun", "ApiCase", "AppCase"]
+__all__ = [
+    "Base",
+    "User",
+    "Project",
+    "Environment",
+    "TaskSchedule",
+    "TaskRun",
+    "ApiCase",
+    "AppCase",
+    "WebCase",
+]

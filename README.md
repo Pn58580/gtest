@@ -389,3 +389,11 @@ docker compose up --build -d
 - App Runner 支持设备ID、脚本路径、关键字断言（模拟 Airtest 执行）
 - 启动自动注入 demo APP 用例
 - 前端新增“APP用例”页面，支持创建/执行/删除
+
+## 22. 继续完善（WEB 客户端自动化）
+
+已新增 WEB 自动化基础闭环：
+- 后端新增 `web_case` 模块：`/api/v1/web-case/list|create|run/{id}|delete`
+- Web Runner 支持页面URL、选择器、期望文本断言（模拟 Playwright 执行）
+- 启动自动注入 demo WEB 用例
+- 前端新增“WEB用例”页面，支持创建/执行/删除

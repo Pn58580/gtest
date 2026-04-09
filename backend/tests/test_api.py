@@ -79,6 +79,25 @@ def test_full_mvp_flow() -> None:
     assert case_run.status_code == 200
 
 
+    web_case = client.post(
+        '/api/v1/web-case/create',
+        headers=headers,
+        json={
+            'project_id': project_id,
+            'name': 'Web Smoke',
+            'page_url': 'https://example.com',
+            'selector': 'h1',
+            'expect_text': 'Example',
+        },
+    )
+    assert web_case.status_code == 200
+    web_case_id = web_case.json()['id']
+
+    web_run = client.post(f'/api/v1/web-case/run/{web_case_id}', headers=headers)
+    assert web_run.status_code == 200
+    assert web_run.json()['engine'] == 'web'
+
+
     app_case = client.post(
         '/api/v1/app-case/create',
         headers=headers,
@@ -137,6 +156,7 @@ def test_full_mvp_flow() -> None:
 
     assert client.delete(f"/api/v1/task/schedule/{schedule_id}", headers=headers).status_code == 200
     assert client.delete(f"/api/v1/api-case/{case_id}", headers=headers).status_code == 200
+    assert client.delete(f"/api/v1/web-case/{web_case_id}", headers=headers).status_code == 200
     assert client.delete(f"/api/v1/app-case/{app_case_id}", headers=headers).status_code == 200
     assert client.delete(f"/api/v1/env/{env_id}", headers=headers).status_code == 200
     assert client.delete(f"/api/v1/project/{project_id}", headers=headers).status_code == 200

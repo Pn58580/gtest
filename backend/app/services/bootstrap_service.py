@@ -10,6 +10,7 @@ from app.services.app_case_service import app_case_service
 from app.services.environment_service import environment_service
 from app.services.project_service import project_service
 from app.services.user_service import user_service
+from app.services.web_case_service import web_case_service
 
 
 def _migrate_legacy_schema(db: Session) -> None:
@@ -45,4 +46,5 @@ def init_db(db: Session) -> None:
     if first_project:
         environment_service.seed_default_env(db, project_id=first_project.id)
         api_case_service.seed_demo_case(db, project_id=first_project.id)
+        web_case_service.seed_demo_case(db, project_id=first_project.id)
         app_case_service.seed_demo_case(db, project_id=first_project.id)
