@@ -341,3 +341,10 @@ docker compose up --build -d
 3. 执行一次 API 用例
 4. 查看执行历史与报告
 5. 创建定时任务并手动触发
+
+## 17. 本次继续完善（具体项目能力）
+
+- 新增“接口用例管理”模块：接口用例 CRUD + 一键执行
+- 新增后端 `api-case` 相关接口：`/api-case/list|create|run/{id}|delete`
+- 前端新增“接口用例”页面并接入后端
+- 后端部署文档补充到 `backend/DEPLOY.md`，并提供 `requirements.txt` 兼容传统部署

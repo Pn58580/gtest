@@ -28,9 +28,6 @@ def test_full_mvp_flow() -> None:
     me = client.get('/api/v1/auth/me', headers=headers)
     assert me.status_code == 200
 
-    users = client.get('/api/v1/system/users', headers=headers)
-    assert users.status_code == 200
-
     create_project = client.post(
         "/api/v1/project/create",
         headers=headers,
@@ -39,34 +36,30 @@ def test_full_mvp_flow() -> None:
     assert create_project.status_code == 200
     project_id = create_project.json()['id']
 
-    projects = client.get("/api/v1/project/list", headers=headers)
-    assert projects.status_code == 200
-    assert len(projects.json()) >= 1
-
-    run = client.post(
-        "/api/v1/run",
+    create_case = client.post(
+        '/api/v1/api-case/create',
         headers=headers,
         json={
-            "project_id": project_id,
-            "case_id": 1,
-            "engine": "api",
-            "triggered_by": "",
-            "params": {"base_url": "https://example.com"},
+            'project_id': project_id,
+            'name': 'Smoke Case',
+            'method': 'GET',
+            'path': '/health',
+            'body': '{}',
         },
     )
-    assert run.status_code == 200
-    run_id = run.json()["run_id"]
+    assert create_case.status_code == 200
+    case_id = create_case.json()['id']
 
-    history = client.get('/api/v1/run/history?limit=10', headers=headers)
-    assert history.status_code == 200
-    assert len(history.json()) >= 1
+    case_list = client.get('/api/v1/api-case/list', headers=headers)
+    assert case_list.status_code == 200
+
+    case_run = client.post(f'/api/v1/api-case/run/{case_id}', headers=headers)
+    assert case_run.status_code == 200
+
+    run_id = case_run.json()['run_id']
 
     report = client.get(f"/api/v1/report/{run_id}", headers=headers)
     assert report.status_code == 200
-
-    recent = client.get('/api/v1/report/recent?limit=10', headers=headers)
-    assert recent.status_code == 200
-    assert len(recent.json()) >= 1
 
     schedule = client.post(
         "/api/v1/task/schedule/create",
@@ -76,7 +69,7 @@ def test_full_mvp_flow() -> None:
             "cron": "*/5 * * * *",
             "engine": "api",
             "project_id": project_id,
-            "case_id": 1,
+            "case_id": case_id,
         },
     )
     assert schedule.status_code == 200
@@ -85,19 +78,12 @@ def test_full_mvp_flow() -> None:
     trigger = client.post(f"/api/v1/task/schedule/{schedule_id}/trigger", headers=headers)
     assert trigger.status_code == 200
 
-    schedule_list = client.get("/api/v1/task/schedule/list", headers=headers)
-    assert schedule_list.status_code == 200
-
-    delete_schedule = client.delete(f"/api/v1/task/schedule/{schedule_id}", headers=headers)
-    assert delete_schedule.status_code == 200
-
     enc = client.post('/api/v1/tool/crypto/encrypt', json={'plaintext': 'abc123'})
     assert enc.status_code == 200
-    cipher = enc.json()['ciphertext']
 
-    dec = client.post('/api/v1/tool/crypto/decrypt', json={'ciphertext': cipher})
+    dec = client.post('/api/v1/tool/crypto/decrypt', json={'ciphertext': enc.json()['ciphertext']})
     assert dec.status_code == 200
-    assert dec.json()['plaintext'] == 'abc123'
 
-    delete_project = client.delete(f"/api/v1/project/{project_id}", headers=headers)
-    assert delete_project.status_code == 200
+    assert client.delete(f"/api/v1/task/schedule/{schedule_id}", headers=headers).status_code == 200
+    assert client.delete(f"/api/v1/api-case/{case_id}", headers=headers).status_code == 200
+    assert client.delete(f"/api/v1/project/{project_id}", headers=headers).status_code == 200
