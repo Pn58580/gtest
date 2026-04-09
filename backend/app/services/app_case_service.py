@@ -1,8 +1,10 @@
+import json
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.app_case import AppCase
-from app.schemas.app_case import AppCaseCreate, AppCaseItem
+from app.schemas.app_case import AppCaseCreate, AppCaseItem, AppStep
 
 
 class AppCaseService:
@@ -11,14 +13,23 @@ class AppCaseService:
         if project_id:
             stmt = stmt.where(AppCase.project_id == project_id)
         rows = db.scalars(stmt).all()
-        return [AppCaseItem.model_validate(row) for row in rows]
+        return [self._to_item(row) for row in rows]
 
     def create_case(self, db: Session, payload: AppCaseCreate) -> AppCaseItem:
-        row = AppCase(**payload.model_dump())
+        row = AppCase(
+            project_id=payload.project_id,
+            name=payload.name,
+            device_id=payload.device_id,
+            app_package=payload.app_package,
+            app_activity=payload.app_activity,
+            script_path=payload.script_path,
+            steps_json=json.dumps([item.model_dump() for item in payload.steps], ensure_ascii=False),
+            assert_keyword=payload.assert_keyword,
+        )
         db.add(row)
         db.commit()
         db.refresh(row)
-        return AppCaseItem.model_validate(row)
+        return self._to_item(row)
 
     def get_case(self, db: Session, case_id: int) -> AppCase | None:
         return db.get(AppCase, case_id)
@@ -48,6 +59,27 @@ class AppCaseService:
             )
         )
         db.commit()
+
+    @staticmethod
+    def _to_item(row: AppCase) -> AppCaseItem:
+        try:
+            raw_steps = json.loads(row.steps_json or '[]')
+        except json.JSONDecodeError:
+            raw_steps = []
+        if not isinstance(raw_steps, list):
+            raw_steps = []
+        steps = [AppStep.model_validate(item) for item in raw_steps if isinstance(item, dict)]
+        return AppCaseItem(
+            id=row.id,
+            project_id=row.project_id,
+            name=row.name,
+            device_id=row.device_id,
+            app_package=row.app_package,
+            app_activity=row.app_activity,
+            script_path=row.script_path,
+            steps=steps,
+            assert_keyword=row.assert_keyword,
+        )
 
 
 app_case_service = AppCaseService()

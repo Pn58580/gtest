@@ -1,4 +1,13 @@
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
+
+
+class AppStep(BaseModel):
+    action: Literal['launch_app', 'tap', 'input', 'swipe', 'wait', 'assert_text', 'assert_exists']
+    target: str = ''
+    value: str = ''
+    ms: int = 500
 
 
 class AppCaseItem(BaseModel):
@@ -9,7 +18,7 @@ class AppCaseItem(BaseModel):
     app_package: str
     app_activity: str
     script_path: str
-    steps_json: str
+    steps: list[AppStep] = Field(default_factory=list)
     assert_keyword: str
 
     model_config = ConfigDict(from_attributes=True)
@@ -22,5 +31,5 @@ class AppCaseCreate(BaseModel):
     app_package: str = Field(default='com.demo.app')
     app_activity: str = Field(default='com.demo.app.MainActivity')
     script_path: str = Field(default='scripts/demo.air')
-    steps_json: str = Field(default='[]')
+    steps: list[AppStep] = Field(default_factory=list)
     assert_keyword: str = Field(default='success')

@@ -38,7 +38,7 @@ class AppRunner(BaseRunner):
             step_name = f'{idx:02d}_{action or "unknown"}'
 
             if action == 'wait':
-                wait_ms = max(0, int(step.get('ms', 500)))
+                wait_ms = self._safe_int(step.get('ms', 500), default=500)
                 elapsed_ms += wait_ms
                 details.append(StepResult(name=step_name, status='passed', message=f'wait={wait_ms}ms'))
                 continue
@@ -99,3 +99,10 @@ class AppRunner(BaseRunner):
         if not isinstance(parsed, list):
             return []
         return [item for item in parsed if isinstance(item, dict)]
+
+    @staticmethod
+    def _safe_int(value: object, default: int = 0) -> int:
+        try:
+            return max(0, int(str(value)))
+        except (TypeError, ValueError):
+            return default

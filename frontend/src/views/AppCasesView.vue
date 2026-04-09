@@ -34,7 +34,7 @@
       <el-form-item label="断言关键字"><el-input v-model="form.assert_keyword" /></el-form-item>
       <el-form-item label="步骤定义(JSON)">
         <el-input
-          v-model="form.steps_json"
+          v-model="form.steps_text"
           type="textarea"
           :rows="7"
           placeholder='[{"action":"launch_app"},{"action":"tap","target":"id=login"}]'
@@ -72,7 +72,7 @@ const form = reactive({
   app_package: 'com.demo.app',
   app_activity: 'com.demo.app.MainActivity',
   script_path: 'scripts/login.air',
-  steps_json: JSON.stringify(defaultSteps),
+  steps_text: JSON.stringify(defaultSteps),
   assert_keyword: 'Welcome'
 })
 
@@ -89,13 +89,19 @@ const fetchCases = async () => {
 const openCreate = () => { visible.value = true }
 
 const createCase = async () => {
+  let steps: unknown[] = []
   try {
-    JSON.parse(form.steps_json)
+    const parsed = JSON.parse(form.steps_text)
+    if (!Array.isArray(parsed)) {
+      ElMessage.error('步骤定义必须是 JSON 数组')
+      return
+    }
+    steps = parsed
   } catch {
     ElMessage.error('步骤定义必须是合法 JSON 数组')
     return
   }
-  await http.post('/app-case/create', form)
+  await http.post('/app-case/create', { ...form, steps })
   visible.value = false
   ElMessage.success('创建成功')
   await fetchCases()

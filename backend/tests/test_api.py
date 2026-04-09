@@ -108,7 +108,11 @@ def test_full_mvp_flow() -> None:
             'app_package': 'com.demo.app',
             'app_activity': 'com.demo.app.MainActivity',
             'script_path': 'scripts/login.air',
-            'steps_json': '[{"action":"launch_app"},{"action":"tap","target":"id=login"},{"action":"assert_text","target":"id=welcome","value":"Welcome"}]',
+            'steps': [
+                {'action': 'launch_app'},
+                {'action': 'tap', 'target': 'id=login'},
+                {'action': 'assert_text', 'target': 'id=welcome', 'value': 'Welcome'},
+            ],
             'assert_keyword': 'Welcome',
         },
     )
