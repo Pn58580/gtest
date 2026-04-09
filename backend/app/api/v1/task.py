@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.api.deps.auth import get_current_user
@@ -44,3 +44,27 @@ def list_schedules(
         }
         for row in rows
     ]
+
+
+@router.post('/schedule/{schedule_id}/trigger')
+def trigger_schedule(
+    schedule_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+) -> dict[str, str]:
+    ok = task_service.trigger_now(db, schedule_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail='schedule not found')
+    return {'message': 'triggered'}
+
+
+@router.delete('/schedule/{schedule_id}')
+def delete_schedule(
+    schedule_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+) -> dict[str, str]:
+    ok = task_service.delete_schedule(db, schedule_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail='schedule not found')
+    return {'message': 'deleted'}

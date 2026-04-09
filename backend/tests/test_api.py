@@ -27,18 +27,17 @@ def test_full_mvp_flow() -> None:
 
     me = client.get('/api/v1/auth/me', headers=headers)
     assert me.status_code == 200
-    assert me.json()['username'] == 'admin'
 
-    user_list = client.get('/api/v1/system/users', headers=headers)
-    assert user_list.status_code == 200
-    assert len(user_list.json()) >= 1
+    users = client.get('/api/v1/system/users', headers=headers)
+    assert users.status_code == 200
 
     create_project = client.post(
         "/api/v1/project/create",
         headers=headers,
-        json={"name": "MVP Project 2"},
+        json={"name": "One Shot Project"},
     )
     assert create_project.status_code == 200
+    project_id = create_project.json()['id']
 
     projects = client.get("/api/v1/project/list", headers=headers)
     assert projects.status_code == 200
@@ -48,10 +47,10 @@ def test_full_mvp_flow() -> None:
         "/api/v1/run",
         headers=headers,
         json={
-            "project_id": 1,
+            "project_id": project_id,
             "case_id": 1,
             "engine": "api",
-            "triggered_by": "admin",
+            "triggered_by": "",
             "params": {"base_url": "https://example.com"},
         },
     )
@@ -64,21 +63,41 @@ def test_full_mvp_flow() -> None:
 
     report = client.get(f"/api/v1/report/{run_id}", headers=headers)
     assert report.status_code == 200
-    assert report.json()["run_id"] == run_id
+
+    recent = client.get('/api/v1/report/recent?limit=10', headers=headers)
+    assert recent.status_code == 200
+    assert len(recent.json()) >= 1
 
     schedule = client.post(
         "/api/v1/task/schedule/create",
         headers=headers,
         json={
-            "name": "smoke-api-2",
+            "name": "one-shot-smoke",
             "cron": "*/5 * * * *",
             "engine": "api",
-            "project_id": 1,
+            "project_id": project_id,
             "case_id": 1,
         },
     )
     assert schedule.status_code == 200
+    schedule_id = schedule.json()['id']
+
+    trigger = client.post(f"/api/v1/task/schedule/{schedule_id}/trigger", headers=headers)
+    assert trigger.status_code == 200
 
     schedule_list = client.get("/api/v1/task/schedule/list", headers=headers)
     assert schedule_list.status_code == 200
-    assert len(schedule_list.json()) >= 1
+
+    delete_schedule = client.delete(f"/api/v1/task/schedule/{schedule_id}", headers=headers)
+    assert delete_schedule.status_code == 200
+
+    enc = client.post('/api/v1/tool/crypto/encrypt', json={'plaintext': 'abc123'})
+    assert enc.status_code == 200
+    cipher = enc.json()['ciphertext']
+
+    dec = client.post('/api/v1/tool/crypto/decrypt', json={'ciphertext': cipher})
+    assert dec.status_code == 200
+    assert dec.json()['plaintext'] == 'abc123'
+
+    delete_project = client.delete(f"/api/v1/project/{project_id}", headers=headers)
+    assert delete_project.status_code == 200

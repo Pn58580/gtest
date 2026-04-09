@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.api.deps.auth import get_current_user
@@ -25,3 +25,15 @@ def create_project(
     current_user: User = Depends(get_current_user),
 ) -> Project:
     return project_service.create_project(db, payload.name, owner_id=current_user.id)
+
+
+@router.delete('/{project_id}')
+def delete_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+) -> dict[str, str]:
+    ok = project_service.delete_project(db, project_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail='project not found')
+    return {'message': 'deleted'}

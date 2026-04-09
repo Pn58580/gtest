@@ -22,5 +22,22 @@ class ReportService:
             steps=detail.get("steps", []),
         )
 
+    def list_recent(self, db: Session, limit: int = 20) -> list[ReportResponse]:
+        rows = db.scalars(select(TaskRun).order_by(TaskRun.id.desc()).limit(limit)).all()
+        items: list[ReportResponse] = []
+        for row in rows:
+            detail = json.loads(row.detail_json)
+            items.append(
+                ReportResponse(
+                    run_id=row.run_id,
+                    engine=row.engine,
+                    status=row.status,
+                    duration_ms=row.duration_ms,
+                    triggered_by=row.triggered_by,
+                    steps=detail.get("steps", []),
+                )
+            )
+        return items
+
 
 report_service = ReportService()

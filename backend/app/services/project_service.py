@@ -17,6 +17,14 @@ class ProjectService:
         db.refresh(row)
         return Project.model_validate(row)
 
+    def delete_project(self, db: Session, project_id: int) -> bool:
+        row = db.get(ProjectModel, project_id)
+        if not row:
+            return False
+        db.delete(row)
+        db.commit()
+        return True
+
     def seed_demo_projects(self, db: Session, owner_id: int) -> None:
         if db.scalar(select(ProjectModel).limit(1)):
             return

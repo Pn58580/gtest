@@ -14,6 +14,8 @@
         <el-menu-item index="/">仪表盘</el-menu-item>
         <el-menu-item index="/projects">项目管理</el-menu-item>
         <el-menu-item index="/runs">执行中心</el-menu-item>
+        <el-menu-item index="/schedules">定时任务</el-menu-item>
+        <el-menu-item index="/reports">测试报告</el-menu-item>
         <el-menu-item v-if="userStore.isAdmin" index="/users">用户管理</el-menu-item>
       </el-menu>
     </el-aside>
@@ -45,6 +47,8 @@ onMounted(() => {
 const activePath = computed(() => {
   if (route.path.startsWith('/projects')) return '/projects'
   if (route.path.startsWith('/runs')) return '/runs'
+  if (route.path.startsWith('/schedules')) return '/schedules'
+  if (route.path.startsWith('/reports')) return '/reports'
   if (route.path.startsWith('/users')) return '/users'
   return '/'
 })

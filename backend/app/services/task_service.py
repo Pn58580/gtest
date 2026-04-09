@@ -22,8 +22,38 @@ class TaskService:
         db.add(row)
         db.commit()
         db.refresh(row)
+        self._register_job(row)
+        return row
 
-        trigger = CronTrigger.from_crontab(payload.cron)
+    def list_schedules(self, db: Session) -> list[TaskSchedule]:
+        return db.scalars(select(TaskSchedule).order_by(TaskSchedule.id.desc())).all()
+
+    def delete_schedule(self, db: Session, schedule_id: int) -> bool:
+        row = db.get(TaskSchedule, schedule_id)
+        if not row:
+            return False
+        db.delete(row)
+        db.commit()
+        job_id = f"task-{schedule_id}"
+        if scheduler.get_job(job_id):
+            scheduler.remove_job(job_id)
+        return True
+
+    def trigger_now(self, db: Session, schedule_id: int) -> bool:
+        row = db.get(TaskSchedule, schedule_id)
+        if not row:
+            return False
+        request = RunRequest(
+            project_id=row.project_id,
+            case_id=row.case_id,
+            engine=row.engine,
+            triggered_by=f"manual:{row.created_by}",
+        )
+        run_service.execute(db, request)
+        return True
+
+    def _register_job(self, row: TaskSchedule) -> None:
+        trigger = CronTrigger.from_crontab(row.cron)
         scheduler.add_job(
             self._run_job,
             trigger=trigger,
@@ -36,10 +66,6 @@ class TaskService:
                 "triggered_by": f"scheduler:{row.created_by}",
             },
         )
-        return row
-
-    def list_schedules(self, db: Session) -> list[TaskSchedule]:
-        return db.scalars(select(TaskSchedule).order_by(TaskSchedule.id.desc())).all()
 
     @staticmethod
     def _run_job(project_id: int, case_id: int, engine: str, triggered_by: str) -> None:

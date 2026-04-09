@@ -11,6 +11,11 @@
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="name" label="项目名称" />
       <el-table-column prop="owner_id" label="Owner" width="120" />
+      <el-table-column label="操作" width="120">
+        <template #default="scope">
+          <el-button type="danger" link @click="removeProject(scope.row.id)">删除</el-button>
+        </template>
+      </el-table-column>
     </el-table>
   </el-card>
 </template>
@@ -44,6 +49,12 @@ const createProject = async () => {
   if (!value) return
   await http.post('/project/create', { name: value })
   ElMessage.success('创建成功')
+  await fetchProjects()
+}
+
+const removeProject = async (id: number) => {
+  await http.delete(`/project/${id}`)
+  ElMessage.success('删除成功')
   await fetchProjects()
 }
 
