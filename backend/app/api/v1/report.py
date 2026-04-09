@@ -5,9 +5,18 @@ from app.api.deps.auth import get_current_user
 from app.api.deps.db import get_db
 from app.models.user import User
 from app.schemas.report import ReportResponse
+from app.schemas.stats import RunStats
 from app.services.report_service import report_service
 
 router = APIRouter()
+
+
+@router.get('/stats', response_model=RunStats)
+def run_stats(
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+) -> RunStats:
+    return report_service.get_stats(db)
 
 
 @router.get('/recent', response_model=list[ReportResponse])

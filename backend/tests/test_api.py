@@ -136,6 +136,9 @@ def test_full_mvp_flow() -> None:
 
     run_id = case_run.json()['run_id']
     assert client.get(f"/api/v1/report/{run_id}", headers=headers).status_code == 200
+    stats = client.get('/api/v1/report/stats', headers=headers)
+    assert stats.status_code == 200
+    assert stats.json()['total_runs'] >= 3
 
     schedule = client.post(
         "/api/v1/task/schedule/create",

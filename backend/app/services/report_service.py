@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models.task import TaskRun
 from app.schemas.report import ReportResponse
+from app.schemas.stats import RunStats
 
 
 class ReportService:
@@ -38,6 +39,23 @@ class ReportService:
                 )
             )
         return items
+
+    def get_stats(self, db: Session) -> RunStats:
+        rows = db.scalars(select(TaskRun)).all()
+        total = len(rows)
+        passed = sum(1 for r in rows if r.status == 'passed')
+        failed = sum(1 for r in rows if r.status == 'failed')
+        api_runs = sum(1 for r in rows if r.engine == 'api')
+        web_runs = sum(1 for r in rows if r.engine == 'web')
+        app_runs = sum(1 for r in rows if r.engine == 'app')
+        return RunStats(
+            total_runs=total,
+            passed_runs=passed,
+            failed_runs=failed,
+            api_runs=api_runs,
+            web_runs=web_runs,
+            app_runs=app_runs,
+        )
 
 
 report_service = ReportService()

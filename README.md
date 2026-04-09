@@ -397,3 +397,9 @@ docker compose up --build -d
 - Web Runner 支持页面URL、选择器、期望文本断言（模拟 Playwright 执行）
 - 启动自动注入 demo WEB 用例
 - 前端新增“WEB用例”页面，支持创建/执行/删除
+
+## 23. 继续完善（执行统计看板）
+
+- 后端新增 `GET /api/v1/report/stats` 统计接口
+- 统计项包含：总执行数、通过数、失败数、API/Web/App 各自执行数
+- 前端仪表盘改为动态读取统计数据，不再使用写死示例值
