@@ -11,6 +11,7 @@ const router = createRouter({
       children: [
         { path: '', component: () => import('../views/DashboardView.vue') },
         { path: 'projects', component: () => import('../views/ProjectsView.vue') },
+        { path: 'environments', component: () => import('../views/EnvironmentsView.vue') },
         { path: 'api-cases', component: () => import('../views/ApiCasesView.vue') },
         { path: 'runs', component: () => import('../views/RunsView.vue') },
         { path: 'schedules', component: () => import('../views/SchedulesView.vue') },

@@ -6,6 +6,7 @@ from app.models import Base
 from app.models.project import Project
 from app.models.user import User
 from app.services.api_case_service import api_case_service
+from app.services.environment_service import environment_service
 from app.services.project_service import project_service
 from app.services.user_service import user_service
 
@@ -19,4 +20,5 @@ def init_db(db: Session) -> None:
 
     first_project = db.scalar(select(Project).order_by(Project.id.asc()))
     if first_project:
+        environment_service.seed_default_env(db, project_id=first_project.id)
         api_case_service.seed_demo_case(db, project_id=first_project.id)

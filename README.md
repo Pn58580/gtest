@@ -361,3 +361,12 @@ docker compose up --build -d
 - 请在后端 `.env` 增加：
   - `LT_CORS_ORIGINS=http://127.0.0.1:5173,http://localhost:5173`
 - 然后重启后端服务。
+
+## 19. 继续完善（环境管理模块）
+
+本次新增了“环境管理（Environment）”能力：
+- 后端新增环境管理接口：`/api/v1/env/list|create|delete`
+- 启动自动为首个项目注入默认环境（dev）
+- 前端新增“环境管理”页面并接入 CRUD
+
+这样 API 用例、执行中心、定时任务都可以逐步接入环境维度能力。

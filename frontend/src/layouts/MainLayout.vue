@@ -13,6 +13,7 @@
       >
         <el-menu-item index="/">仪表盘</el-menu-item>
         <el-menu-item index="/projects">项目管理</el-menu-item>
+        <el-menu-item index="/environments">环境管理</el-menu-item>
         <el-menu-item index="/api-cases">接口用例</el-menu-item>
         <el-menu-item index="/runs">执行中心</el-menu-item>
         <el-menu-item index="/schedules">定时任务</el-menu-item>
@@ -47,6 +48,7 @@ onMounted(() => {
 
 const activePath = computed(() => {
   if (route.path.startsWith('/projects')) return '/projects'
+  if (route.path.startsWith('/environments')) return '/environments'
   if (route.path.startsWith('/api-cases')) return '/api-cases'
   if (route.path.startsWith('/runs')) return '/runs'
   if (route.path.startsWith('/schedules')) return '/schedules'
