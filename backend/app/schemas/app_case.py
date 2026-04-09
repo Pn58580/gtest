@@ -33,3 +33,13 @@ class AppCaseCreate(BaseModel):
     script_path: str = Field(default='scripts/demo.air')
     steps: list[AppStep] = Field(default_factory=list)
     assert_keyword: str = Field(default='success')
+
+
+class AppCaseUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=128)
+    device_id: str | None = None
+    app_package: str | None = None
+    app_activity: str | None = None
+    script_path: str | None = None
+    steps: list[AppStep] | None = None
+    assert_keyword: str | None = None

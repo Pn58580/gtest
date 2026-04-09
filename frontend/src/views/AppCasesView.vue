@@ -17,6 +17,7 @@
       <el-table-column prop="assert_keyword" label="断言关键字" width="120" />
       <el-table-column label="操作" width="220">
         <template #default="scope">
+          <el-button link type="primary" @click="openEdit(scope.row as Record<string, unknown>)">编辑</el-button>
           <el-button link type="success" @click="runCase(scope.row.id as number)">执行</el-button>
           <el-button link type="danger" @click="removeCase(scope.row.id as number)">删除</el-button>
         </template>
@@ -24,7 +25,7 @@
     </el-table>
   </el-card>
 
-  <el-dialog v-model="visible" title="新增APP用例" width="720px">
+  <el-dialog v-model="visible" :title="editingId ? '编辑APP用例' : '新增APP用例'" width="720px">
     <el-form :model="form" label-width="110px">
       <el-form-item label="名称"><el-input v-model="form.name" /></el-form-item>
       <el-form-item label="设备ID"><el-input v-model="form.device_id" /></el-form-item>
@@ -55,6 +56,7 @@ import { http } from '../api/http'
 
 const loading = ref(false)
 const visible = ref(false)
+const editingId = ref<number | null>(null)
 const cases = ref<Array<Record<string, unknown>>>([])
 
 const defaultSteps = [
@@ -86,7 +88,22 @@ const fetchCases = async () => {
   }
 }
 
-const openCreate = () => { visible.value = true }
+const openCreate = () => {
+  editingId.value = null
+  visible.value = true
+}
+
+const openEdit = (item: Record<string, unknown>) => {
+  editingId.value = Number(item.id)
+  form.name = String(item.name ?? '')
+  form.device_id = String(item.device_id ?? '')
+  form.app_package = String(item.app_package ?? '')
+  form.app_activity = String(item.app_activity ?? '')
+  form.script_path = String(item.script_path ?? '')
+  form.assert_keyword = String(item.assert_keyword ?? '')
+  form.steps_text = JSON.stringify(item.steps ?? [], null, 2)
+  visible.value = true
+}
 
 const createCase = async () => {
   let steps: unknown[] = []
@@ -101,9 +118,23 @@ const createCase = async () => {
     ElMessage.error('步骤定义必须是合法 JSON 数组')
     return
   }
-  await http.post('/app-case/create', { ...form, steps })
+  const payload = {
+    project_id: form.project_id,
+    name: form.name,
+    device_id: form.device_id,
+    app_package: form.app_package,
+    app_activity: form.app_activity,
+    script_path: form.script_path,
+    steps,
+    assert_keyword: form.assert_keyword
+  }
+  if (editingId.value) {
+    await http.put(`/app-case/${editingId.value}`, payload)
+  } else {
+    await http.post('/app-case/create', payload)
+  }
   visible.value = false
-  ElMessage.success('创建成功')
+  ElMessage.success(editingId.value ? '更新成功' : '创建成功')
   await fetchCases()
 }
 

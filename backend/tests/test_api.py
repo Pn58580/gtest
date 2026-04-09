@@ -119,6 +119,22 @@ def test_full_mvp_flow() -> None:
     assert app_case.status_code == 200
     app_case_id = app_case.json()['id']
 
+    app_case_update = client.put(
+        f'/api/v1/app-case/{app_case_id}',
+        headers=headers,
+        json={
+            'name': 'App Smoke Updated',
+            'steps': [
+                {'action': 'launch_app'},
+                {'action': 'wait', 'ms': 600},
+                {'action': 'assert_exists', 'target': 'id=welcome'},
+            ],
+            'assert_keyword': 'Welcome',
+        },
+    )
+    assert app_case_update.status_code == 200
+    assert app_case_update.json()['name'] == 'App Smoke Updated'
+
     app_run = client.post(f'/api/v1/app-case/run/{app_case_id}', headers=headers)
     assert app_run.status_code == 200
     assert app_run.json()['engine'] == 'app'

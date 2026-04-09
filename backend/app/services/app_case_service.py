@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.app_case import AppCase
-from app.schemas.app_case import AppCaseCreate, AppCaseItem, AppStep
+from app.schemas.app_case import AppCaseCreate, AppCaseItem, AppCaseUpdate, AppStep
 
 
 class AppCaseService:
@@ -33,6 +33,24 @@ class AppCaseService:
 
     def get_case(self, db: Session, case_id: int) -> AppCase | None:
         return db.get(AppCase, case_id)
+
+
+    def update_case(self, db: Session, case_id: int, payload: AppCaseUpdate) -> AppCaseItem | None:
+        row = self.get_case(db, case_id)
+        if not row:
+            return None
+
+        data = payload.model_dump(exclude_unset=True)
+        steps = data.pop('steps', None)
+        for field, value in data.items():
+            setattr(row, field, value)
+        if steps is not None:
+            row.steps_json = json.dumps([item.model_dump() for item in steps], ensure_ascii=False)
+
+        db.add(row)
+        db.commit()
+        db.refresh(row)
+        return self._to_item(row)
 
     def delete_case(self, db: Session, case_id: int) -> bool:
         row = self.get_case(db, case_id)

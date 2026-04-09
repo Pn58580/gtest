@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.api.deps.auth import get_current_user
 from app.api.deps.db import get_db
 from app.models.user import User
-from app.schemas.app_case import AppCaseCreate, AppCaseItem
+from app.schemas.app_case import AppCaseCreate, AppCaseItem, AppCaseUpdate
 from app.schemas.common import RunRequest, RunResult
 from app.services.app_case_service import app_case_service
 from app.services.environment_service import environment_service
@@ -29,6 +29,18 @@ def create_case(
     _: User = Depends(get_current_user),
 ) -> AppCaseItem:
     return app_case_service.create_case(db, payload)
+
+@router.put('/{case_id}', response_model=AppCaseItem)
+def update_case(
+    case_id: int,
+    payload: AppCaseUpdate,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+) -> AppCaseItem:
+    updated = app_case_service.update_case(db, case_id, payload)
+    if not updated:
+        raise HTTPException(status_code=404, detail='case not found')
+    return updated
 
 
 @router.post('/run/{case_id}', response_model=RunResult)
