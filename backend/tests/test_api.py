@@ -78,6 +78,25 @@ def test_full_mvp_flow() -> None:
     case_run = client.post(f'/api/v1/api-case/run/{case_id}', headers=headers)
     assert case_run.status_code == 200
 
+
+    app_case = client.post(
+        '/api/v1/app-case/create',
+        headers=headers,
+        json={
+            'project_id': project_id,
+            'name': 'App Smoke',
+            'device_id': 'emulator-5554',
+            'script_path': 'scripts/login.air',
+            'assert_keyword': 'success',
+        },
+    )
+    assert app_case.status_code == 200
+    app_case_id = app_case.json()['id']
+
+    app_run = client.post(f'/api/v1/app-case/run/{app_case_id}', headers=headers)
+    assert app_run.status_code == 200
+    assert app_run.json()['engine'] == 'app'
+
     fail_case = client.post(
         '/api/v1/api-case/create',
         headers=headers,
@@ -118,5 +137,6 @@ def test_full_mvp_flow() -> None:
 
     assert client.delete(f"/api/v1/task/schedule/{schedule_id}", headers=headers).status_code == 200
     assert client.delete(f"/api/v1/api-case/{case_id}", headers=headers).status_code == 200
+    assert client.delete(f"/api/v1/app-case/{app_case_id}", headers=headers).status_code == 200
     assert client.delete(f"/api/v1/env/{env_id}", headers=headers).status_code == 200
     assert client.delete(f"/api/v1/project/{project_id}", headers=headers).status_code == 200

@@ -13,6 +13,7 @@ const router = createRouter({
         { path: 'projects', component: () => import('../views/ProjectsView.vue') },
         { path: 'environments', component: () => import('../views/EnvironmentsView.vue') },
         { path: 'api-cases', component: () => import('../views/ApiCasesView.vue') },
+        { path: 'app-cases', component: () => import('../views/AppCasesView.vue') },
         { path: 'runs', component: () => import('../views/RunsView.vue') },
         { path: 'schedules', component: () => import('../views/SchedulesView.vue') },
         { path: 'reports', component: () => import('../views/ReportsView.vue') },

@@ -381,3 +381,11 @@ docker compose up --build -d
 - 这是旧数据库结构与新代码字段不一致。
 - 当前版本已在启动时自动补齐关键字段。
 - 若仍失败，删除本地 `ltester.db` 后重启可重新建库。
+
+## 21. 继续完善（APP 客户端自动化）
+
+已先完成 APP 自动化的基础闭环：
+- 后端新增 `app_case` 模块：`/api/v1/app-case/list|create|run/{id}|delete`
+- App Runner 支持设备ID、脚本路径、关键字断言（模拟 Airtest 执行）
+- 启动自动注入 demo APP 用例
+- 前端新增“APP用例”页面，支持创建/执行/删除
