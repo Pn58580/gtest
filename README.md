@@ -376,3 +376,8 @@ docker compose up --build -d
 - 接口用例新增断言字段：`expected_status`、`expected_keyword`
 - API Runner 新增模拟断言步骤：状态码断言 + 关键字断言
 - 前端接口用例页面支持配置断言并展示执行通过/失败
+
+### Q3: 启动报错 `no such column: api_case.expected_status`
+- 这是旧数据库结构与新代码字段不一致。
+- 当前版本已在启动时自动补齐关键字段。
+- 若仍失败，删除本地 `ltester.db` 后重启可重新建库。

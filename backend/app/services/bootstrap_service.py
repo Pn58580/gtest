@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import inspect, select, text
 from sqlalchemy.orm import Session
 
 from app.db.session import engine
@@ -11,8 +11,30 @@ from app.services.project_service import project_service
 from app.services.user_service import user_service
 
 
+def _migrate_legacy_schema(db: Session) -> None:
+    """Lightweight migration for older local DB files without Alembic."""
+    inspector = inspect(engine)
+    tables = set(inspector.get_table_names())
+
+    if 'api_case' in tables:
+        cols = {col['name'] for col in inspector.get_columns('api_case')}
+        if 'expected_status' not in cols:
+            db.execute(text('ALTER TABLE api_case ADD COLUMN expected_status INTEGER DEFAULT 200'))
+        if 'expected_keyword' not in cols:
+            db.execute(text("ALTER TABLE api_case ADD COLUMN expected_keyword VARCHAR(128) DEFAULT ''"))
+
+    if 'proj_env' in tables:
+        cols = {col['name'] for col in inspector.get_columns('proj_env')}
+        if 'variables_json' not in cols:
+            db.execute(text("ALTER TABLE proj_env ADD COLUMN variables_json TEXT DEFAULT '{}'"))
+
+    db.commit()
+
+
 def init_db(db: Session) -> None:
     Base.metadata.create_all(bind=engine)
+    _migrate_legacy_schema(db)
+
     user_service.create_admin_if_not_exists(db)
     admin = db.scalar(select(User).where(User.username == "admin"))
     if admin:

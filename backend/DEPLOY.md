@@ -99,3 +99,14 @@ docker compose logs -f backend
 ```bash
 docker compose down
 ```
+
+## 8. 升级历史数据库报错（no such column）
+
+如果你升级代码后看到类似：
+- `no such column: api_case.expected_status`
+
+说明你的旧 SQLite 文件是老表结构。当前版本已内置轻量自动补字段逻辑，重启后会自动尝试修复。
+
+如果仍异常，可选方案：
+1. 备份并删除旧 `ltester.db`，让系统重新建库。
+2. 或使用 Alembic（后续建议）管理结构迁移。
