@@ -90,6 +90,13 @@ const fetchCases = async () => {
 
 const openCreate = () => {
   editingId.value = null
+  form.name = 'APP 冒烟用例'
+  form.device_id = 'emulator-5554'
+  form.app_package = 'com.demo.app'
+  form.app_activity = 'com.demo.app.MainActivity'
+  form.script_path = 'scripts/login.air'
+  form.assert_keyword = 'Welcome'
+  form.steps_text = JSON.stringify(defaultSteps, null, 2)
   visible.value = true
 }
 

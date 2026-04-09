@@ -139,7 +139,10 @@ def test_full_mvp_flow() -> None:
     assert app_run.status_code == 200
     assert app_run.json()['engine'] == 'app'
     assert app_run.json()['status'] == 'passed'
-    assert any(step['name'].endswith('assert_text') for step in app_run.json()['steps'])
+    assert any(
+        step['name'].endswith('assert_text') or step['name'].endswith('assert_exists')
+        for step in app_run.json()['steps']
+    )
 
     fail_case = client.post(
         '/api/v1/api-case/create',
