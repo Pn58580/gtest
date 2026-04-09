@@ -42,6 +42,8 @@ class ApiCaseService:
                 method='GET',
                 path='/health',
                 body='{}',
+                expected_status=200,
+                expected_keyword='ok',
             )
         )
         db.commit()

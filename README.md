@@ -370,3 +370,9 @@ docker compose up --build -d
 - 前端新增“环境管理”页面并接入 CRUD
 
 这样 API 用例、执行中心、定时任务都可以逐步接入环境维度能力。
+
+## 20. 继续完善（接口断言能力）
+
+- 接口用例新增断言字段：`expected_status`、`expected_keyword`
+- API Runner 新增模拟断言步骤：状态码断言 + 关键字断言
+- 前端接口用例页面支持配置断言并展示执行通过/失败

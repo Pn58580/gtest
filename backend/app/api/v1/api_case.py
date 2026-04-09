@@ -49,6 +49,8 @@ def run_case(
             'method': case.method,
             'path': case.path,
             'body': case.body,
+            'expected_status': case.expected_status,
+            'expected_keyword': case.expected_keyword,
         },
     )
     return run_service.execute(db, request)

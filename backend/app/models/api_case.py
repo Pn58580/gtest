@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, String, Text
+from sqlalchemy import ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
@@ -13,3 +13,5 @@ class ApiCase(Base):
     method: Mapped[str] = mapped_column(String(10), default='GET')
     path: Mapped[str] = mapped_column(String(255))
     body: Mapped[str] = mapped_column(Text, default='{}')
+    expected_status: Mapped[int] = mapped_column(Integer, default=200)
+    expected_keyword: Mapped[str] = mapped_column(String(128), default='')

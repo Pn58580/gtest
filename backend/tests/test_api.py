@@ -78,6 +78,24 @@ def test_full_mvp_flow() -> None:
     case_run = client.post(f'/api/v1/api-case/run/{case_id}', headers=headers)
     assert case_run.status_code == 200
 
+    fail_case = client.post(
+        '/api/v1/api-case/create',
+        headers=headers,
+        json={
+            'project_id': project_id,
+            'name': 'Fail Case',
+            'method': 'GET',
+            'path': '/not-found',
+            'body': '{}',
+            'expected_status': 200,
+            'expected_keyword': 'ok',
+        },
+    )
+    assert fail_case.status_code == 200
+    fail_run = client.post(f"/api/v1/api-case/run/{fail_case.json()['id']}", headers=headers)
+    assert fail_run.status_code == 200
+    assert fail_run.json()['status'] == 'failed'
+
     run_id = case_run.json()['run_id']
     assert client.get(f"/api/v1/report/{run_id}", headers=headers).status_code == 200
 
