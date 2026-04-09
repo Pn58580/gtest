@@ -7,8 +7,15 @@ from app.schemas.project import Project
 
 class ProjectService:
     def list_projects(self, db: Session) -> list[Project]:
-        rows = db.scalars(select(ProjectModel)).all()
+        rows = db.scalars(select(ProjectModel).order_by(ProjectModel.id.desc())).all()
         return [Project.model_validate(row) for row in rows]
+
+    def create_project(self, db: Session, name: str, owner_id: int) -> Project:
+        row = ProjectModel(name=name, owner_id=owner_id)
+        db.add(row)
+        db.commit()
+        db.refresh(row)
+        return Project.model_validate(row)
 
     def seed_demo_projects(self, db: Session, owner_id: int) -> None:
         if db.scalar(select(ProjectModel).limit(1)):
@@ -17,6 +24,7 @@ class ProjectService:
             [
                 ProjectModel(name="Demo API Project", owner_id=owner_id),
                 ProjectModel(name="Demo Web Project", owner_id=owner_id),
+                ProjectModel(name="Demo App Project", owner_id=owner_id),
             ]
         )
         db.commit()

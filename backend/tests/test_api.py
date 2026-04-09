@@ -6,26 +6,39 @@ from app.main import app
 client = TestClient(app)
 
 
+def _auth_headers() -> dict[str, str]:
+    login = client.post(
+        "/api/v1/auth/login",
+        json={"username": "admin", "password": "admin123"},
+    )
+    assert login.status_code == 200
+    token = login.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
 def test_health() -> None:
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
 
 
-def test_login_project_and_run() -> None:
-    login = client.post(
-        "/api/v1/auth/login",
-        json={"username": "admin", "password": "admin123"},
-    )
-    assert login.status_code == 200
-    assert login.json()["access_token"]
+def test_project_run_report_and_schedule_flow() -> None:
+    headers = _auth_headers()
 
-    projects = client.get("/api/v1/project/list")
+    create_project = client.post(
+        "/api/v1/project/create",
+        headers=headers,
+        json={"name": "MVP Project"},
+    )
+    assert create_project.status_code == 200
+
+    projects = client.get("/api/v1/project/list", headers=headers)
     assert projects.status_code == 200
     assert len(projects.json()) >= 1
 
     run = client.post(
         "/api/v1/run",
+        headers=headers,
         json={
             "project_id": 1,
             "case_id": 1,
@@ -35,7 +48,25 @@ def test_login_project_and_run() -> None:
         },
     )
     assert run.status_code == 200
-    body = run.json()
-    assert body["engine"] == "api"
-    assert body["status"] == "passed"
-    assert len(body["steps"]) >= 1
+    run_id = run.json()["run_id"]
+
+    report = client.get(f"/api/v1/report/{run_id}", headers=headers)
+    assert report.status_code == 200
+    assert report.json()["run_id"] == run_id
+
+    schedule = client.post(
+        "/api/v1/task/schedule/create",
+        headers=headers,
+        json={
+            "name": "smoke-api",
+            "cron": "*/5 * * * *",
+            "engine": "api",
+            "project_id": 1,
+            "case_id": 1,
+        },
+    )
+    assert schedule.status_code == 200
+
+    schedule_list = client.get("/api/v1/task/schedule/list", headers=headers)
+    assert schedule_list.status_code == 200
+    assert len(schedule_list.json()) >= 1

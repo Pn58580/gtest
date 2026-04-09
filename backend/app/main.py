@@ -7,7 +7,7 @@ from app.services.bootstrap_service import init_db
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="L-Tester Pro API", version="0.2.0")
+    app = FastAPI(title="L-Tester Pro API", version="0.3.0")
 
     @app.get("/health", tags=["system"])
     def health() -> dict[str, str]:
@@ -22,7 +22,8 @@ def create_app() -> FastAPI:
             init_db(db)
         finally:
             db.close()
-        scheduler.start()
+        if not scheduler.running:
+            scheduler.start()
 
     @app.on_event("shutdown")
     def _shutdown() -> None:
