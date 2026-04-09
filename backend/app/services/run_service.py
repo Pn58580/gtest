@@ -1,5 +1,6 @@
 import json
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.task import TaskRun
@@ -8,6 +9,7 @@ from app.runners.app_runner import AppRunner
 from app.runners.base import BaseRunner
 from app.runners.web_runner import WebRunner
 from app.schemas.common import RunRequest, RunResult
+from app.schemas.history import RunHistoryItem
 
 
 class RunService:
@@ -33,6 +35,19 @@ class RunService:
         )
         db.commit()
         return result
+
+    def list_history(self, db: Session, limit: int = 20) -> list[RunHistoryItem]:
+        rows = db.scalars(select(TaskRun).order_by(TaskRun.id.desc()).limit(limit)).all()
+        return [
+            RunHistoryItem(
+                run_id=item.run_id,
+                engine=item.engine,
+                status=item.status,
+                duration_ms=item.duration_ms,
+                triggered_by=item.triggered_by,
+            )
+            for item in rows
+        ]
 
 
 run_service = RunService()

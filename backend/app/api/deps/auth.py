@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
@@ -26,3 +28,12 @@ def get_current_user(
         raise HTTPException(status_code=401, detail="user not found")
 
     return user
+
+
+def require_role(*roles: str) -> Callable[[User], User]:
+    def _checker(current_user: User = Depends(get_current_user)) -> User:
+        if current_user.role not in roles:
+            raise HTTPException(status_code=403, detail="forbidden")
+        return current_user
+
+    return _checker

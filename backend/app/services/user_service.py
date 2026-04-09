@@ -13,6 +13,9 @@ class UserService:
         db.add(User(username="admin", password_hash=hash_password("admin123"), role="admin"))
         db.commit()
 
+    def list_users(self, db: Session) -> list[User]:
+        return db.scalars(select(User).order_by(User.id.asc())).all()
+
     def get_by_username(self, db: Session, username: str) -> User | None:
         return db.scalar(select(User).where(User.username == username))
 
