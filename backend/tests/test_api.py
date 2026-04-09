@@ -105,8 +105,11 @@ def test_full_mvp_flow() -> None:
             'project_id': project_id,
             'name': 'App Smoke',
             'device_id': 'emulator-5554',
+            'app_package': 'com.demo.app',
+            'app_activity': 'com.demo.app.MainActivity',
             'script_path': 'scripts/login.air',
-            'assert_keyword': 'success',
+            'steps_json': '[{"action":"launch_app"},{"action":"tap","target":"id=login"},{"action":"assert_text","target":"id=welcome","value":"Welcome"}]',
+            'assert_keyword': 'Welcome',
         },
     )
     assert app_case.status_code == 200
@@ -115,6 +118,8 @@ def test_full_mvp_flow() -> None:
     app_run = client.post(f'/api/v1/app-case/run/{app_case_id}', headers=headers)
     assert app_run.status_code == 200
     assert app_run.json()['engine'] == 'app'
+    assert app_run.json()['status'] == 'passed'
+    assert any(step['name'].endswith('assert_text') for step in app_run.json()['steps'])
 
     fail_case = client.post(
         '/api/v1/api-case/create',

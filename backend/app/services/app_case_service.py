@@ -40,8 +40,11 @@ class AppCaseService:
                 project_id=project_id,
                 name='App 登录冒烟',
                 device_id='emulator-5554',
+                app_package='com.demo.app',
+                app_activity='com.demo.app.MainActivity',
                 script_path='scripts/login_smoke.air',
-                assert_keyword='success',
+                steps_json='[{"action":"launch_app"},{"action":"input","target":"id=username","value":"demo"},{"action":"tap","target":"id=login"},{"action":"assert_text","target":"id=welcome","value":"Welcome"}]',
+                assert_keyword='Welcome',
             )
         )
         db.commit()

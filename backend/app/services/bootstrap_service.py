@@ -25,6 +25,16 @@ def _migrate_legacy_schema(db: Session) -> None:
         if 'expected_keyword' not in cols:
             db.execute(text("ALTER TABLE api_case ADD COLUMN expected_keyword VARCHAR(128) DEFAULT ''"))
 
+
+    if 'app_case' in tables:
+        cols = {col['name'] for col in inspector.get_columns('app_case')}
+        if 'app_package' not in cols:
+            db.execute(text("ALTER TABLE app_case ADD COLUMN app_package VARCHAR(128) DEFAULT 'com.demo.app'"))
+        if 'app_activity' not in cols:
+            db.execute(text("ALTER TABLE app_case ADD COLUMN app_activity VARCHAR(128) DEFAULT 'com.demo.app.MainActivity'"))
+        if 'steps_json' not in cols:
+            db.execute(text("ALTER TABLE app_case ADD COLUMN steps_json TEXT DEFAULT '[]'"))
+
     if 'proj_env' in tables:
         cols = {col['name'] for col in inspector.get_columns('proj_env')}
         if 'variables_json' not in cols:

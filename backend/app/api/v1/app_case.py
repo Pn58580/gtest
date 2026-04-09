@@ -52,7 +52,10 @@ def run_case(
         triggered_by=current_user.username,
         params={
             'device_id': case.device_id,
+            'app_package': case.app_package,
+            'app_activity': case.app_activity,
             'script_path': case.script_path,
+            'steps_json': case.steps_json,
             'assert_keyword': case.assert_keyword,
             'env_name': env.name if env else '',
             'base_url': env.base_url if env else '',

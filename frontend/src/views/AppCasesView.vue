@@ -9,25 +9,37 @@
 
     <el-table :data="cases" v-loading="loading" stripe>
       <el-table-column prop="id" label="ID" width="70" />
-      <el-table-column prop="name" label="用例名称" min-width="160" />
+      <el-table-column prop="name" label="用例名称" min-width="150" />
       <el-table-column prop="device_id" label="设备" width="130" />
-      <el-table-column prop="script_path" label="脚本路径" min-width="220" />
+      <el-table-column prop="app_package" label="App 包名" min-width="150" />
+      <el-table-column prop="app_activity" label="启动 Activity" min-width="190" />
+      <el-table-column prop="script_path" label="脚本路径" min-width="200" />
       <el-table-column prop="assert_keyword" label="断言关键字" width="120" />
       <el-table-column label="操作" width="220">
         <template #default="scope">
-          <el-button link type="success" @click="runCase(scope.row.id)">执行</el-button>
-          <el-button link type="danger" @click="removeCase(scope.row.id)">删除</el-button>
+          <el-button link type="success" @click="runCase(scope.row.id as number)">执行</el-button>
+          <el-button link type="danger" @click="removeCase(scope.row.id as number)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
   </el-card>
 
-  <el-dialog v-model="visible" title="新增APP用例" width="520px">
-    <el-form :model="form" label-width="96px">
+  <el-dialog v-model="visible" title="新增APP用例" width="720px">
+    <el-form :model="form" label-width="110px">
       <el-form-item label="名称"><el-input v-model="form.name" /></el-form-item>
       <el-form-item label="设备ID"><el-input v-model="form.device_id" /></el-form-item>
+      <el-form-item label="App 包名"><el-input v-model="form.app_package" /></el-form-item>
+      <el-form-item label="启动 Activity"><el-input v-model="form.app_activity" /></el-form-item>
       <el-form-item label="脚本路径"><el-input v-model="form.script_path" /></el-form-item>
       <el-form-item label="断言关键字"><el-input v-model="form.assert_keyword" /></el-form-item>
+      <el-form-item label="步骤定义(JSON)">
+        <el-input
+          v-model="form.steps_json"
+          type="textarea"
+          :rows="7"
+          placeholder='[{"action":"launch_app"},{"action":"tap","target":"id=login"}]'
+        />
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="visible=false">取消</el-button>
@@ -45,12 +57,23 @@ const loading = ref(false)
 const visible = ref(false)
 const cases = ref<Array<Record<string, unknown>>>([])
 
+const defaultSteps = [
+  { action: 'launch_app' },
+  { action: 'input', target: 'id=username', value: 'demo' },
+  { action: 'input', target: 'id=password', value: '123456' },
+  { action: 'tap', target: 'id=login' },
+  { action: 'assert_text', target: 'id=welcome', value: 'Welcome' }
+]
+
 const form = reactive({
   project_id: 1,
   name: 'APP 冒烟用例',
   device_id: 'emulator-5554',
+  app_package: 'com.demo.app',
+  app_activity: 'com.demo.app.MainActivity',
   script_path: 'scripts/login.air',
-  assert_keyword: 'success'
+  steps_json: JSON.stringify(defaultSteps),
+  assert_keyword: 'Welcome'
 })
 
 const fetchCases = async () => {
@@ -66,6 +89,12 @@ const fetchCases = async () => {
 const openCreate = () => { visible.value = true }
 
 const createCase = async () => {
+  try {
+    JSON.parse(form.steps_json)
+  } catch {
+    ElMessage.error('步骤定义必须是合法 JSON 数组')
+    return
+  }
   await http.post('/app-case/create', form)
   visible.value = false
   ElMessage.success('创建成功')
