@@ -217,3 +217,71 @@ frontend/
 - FastAPI 后端骨架（含 RBAC、调度、Runner 抽象）
 - Vue3 前端后台模板骨架（多端响应式）
 - 初版 MySQL 表结构 SQL + 初始化脚本
+
+## 13. 项目部署事项（Backend + Frontend）
+
+### 13.1 环境要求
+
+- Python 3.11+
+- Node.js 20+
+- MySQL 8.0+（开发阶段可先用 SQLite）
+- Redis（建议，用于缓存与任务队列扩展）
+
+### 13.2 后端部署步骤
+
+1. 配置环境变量（建议放在 `backend/.env`）：
+   - `LT_DATABASE_URL=mysql+pymysql://user:pwd@127.0.0.1:3306/ltester`
+   - `LT_JWT_SECRET=please_change_me`
+2. 安装依赖并启动：
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .[dev]
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+3. 首次启动会自动建表并初始化：
+   - 默认管理员：`admin / admin123`（上线前必须修改）
+
+### 13.3 前端部署步骤
+
+```bash
+cd frontend
+npm install
+npm run build
+```
+
+- 构建产物在 `frontend/dist`，可由 Nginx 托管。
+- 通过 `VITE_API_BASE` 指向后端地址，例如：
+  - `VITE_API_BASE=https://your-domain.com/api/v1`
+
+### 13.4 Nginx 反向代理示例
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    location / {
+        root /data/ltester/frontend/dist;
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
+
+### 13.5 上线前检查清单
+
+- [ ] 修改默认管理员密码
+- [ ] 使用 MySQL 替代 SQLite
+- [ ] 配置 HTTPS 与跨域策略
+- [ ] 配置日志归档与监控告警
+- [ ] 压测关键接口（登录、执行、报告查询）
